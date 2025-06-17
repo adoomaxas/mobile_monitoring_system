@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: timescale/timescaledb:2.13.0-pg15
+    container_name: stats_postgres
+    environment:
+      POSTGRES_DB: stats_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - stats_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d stats_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  stats-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stats_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stats_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "1212:1212"
+    networks:
+      - stats_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  stats_network:
+    driver: bridge

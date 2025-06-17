@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="init-db">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/backend/stats/init-db.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
